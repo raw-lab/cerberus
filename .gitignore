@@ -1,0 +1,7 @@
+.vstudio
+__pycache__
+*.egg-info
+build
+temp*
+cerberusDB
+pipeline
