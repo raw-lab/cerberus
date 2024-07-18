@@ -63,7 +63,8 @@ cerberus.py --setup
 cerberus.py --download
 ```
 
-- NOTE: Mamba is the fastest installer. Anaconda or miniconda can be slow. Also, install mamba from conda not from pip. The pip mamba doesn't work for install. 
+> [!NOTE]
+> Mamba is the fastest installer. Anaconda or miniconda can be slow. Also, install mamba from conda not from pip. The pip mamba doesn't work for install. 
 
 ### Option 2) Anaconda - Linux/OSX-64 Only
 
@@ -92,37 +93,43 @@ cerberus.py --download
 <p align="center">
   <img src="https://raw.githubusercontent.com/raw-lab/cerberus/main/img/workflow.jpg" alt="Cerberus Workflow" height=600>
 </p>
-
-### Cerberus has three basic modes: quality control (QC) for raw reads, formatting/gene prediction, and annotation. 
-- Cerberus can use three different input files: 1) raw read data from any sequencing platform (Illumina, PacBio, or Oxford Nanopore), 2) assembled contigs, as MAGs, vMAGs, isolate genomes, or a collection of contigs, 3) amino acid fasta (.faa), previously called pORFs.
+### General Info
+* Cerberus has **three** basic modes: 
+    1. Quality Control (QC) for raw reads
+    2. Formatting/gene prediction
+    3. Annotation 
+* Cerberus can use **three** different input files:
+    1. Raw read data from any sequencing platform (Illumina, PacBio, or Oxford Nanopore)
+    2. Assembled contigs, as MAGs, vMAGs, isolate genomes, or a collection of contigs
+    3. Amino acid fasta (.faa), previously called pORFs
 - We offer customization, including running all databases together, individually or specifying select databases. For example, if a user wants to run prokaryotic or eukaryotic-specific KOfams, or an individual database alone such as dbCAN, both are easily customized within Cerberus.
-- In QC mode, raw reads are quality controlled via FastQC prior and post trim [FastQC](https://github.com/s-andrews/FastQC). Raw reads are then trimmed via data type; if the data is Illumina or PacBio, [fastp](https://doi.org/10.1093/bioinformatics/bty560)  is called, otherwise it assumes the data is Oxford Nanopore then Porechop is utilized [PoreChop](https://github.com/rrwick/Porechop).
+- In QC mode, raw reads are quality controlled via FastQC prior and post trim [FastQC](https://github.com/s-andrews/FastQC). Raw reads are then trimmed via data type; if the data is Illumina or PacBio, [fastp](https://doi.org/10.1093/bioinformatics/bty560)  is called, otherwise it assumes the data is Oxford Nanopore, then [PoreChop](https://github.com/rrwick/Porechop) is utilized.
 - If Illumina reads are utilized, an optional bbmap step to remove the phiX174 genome is available or user provided contaminate genome. Phage phiX174 is a common contaminant within the Illumina platform as their library spike-in control. We highly recommend this removal if viral analysis is conducted, as it would provide false positives to ssDNA microviruses within a sample.
-- We include a --skip_decon option to skip the filtration of phiX174, which may remove common k-mers that are shared in ssDNA phages.
+- We include a ```--skip_decon``` option to skip the filtration of phiX174, which may remove common k-mers that are shared in ssDNA phages.
 - In the formatting and gene prediction stage, contigs and genomes are checked for N repeats. These N repeats are removed by default.
 - We impute contig/genome statistics (e.g., N50, N90, max contig) via our custom module [Metaome Stats](https://github.com/raw-lab/metaome_stats).
 - Contigs can be converted to pORFs using [Prodigal](https://anaconda.org/bioconda/prodigal), [FragGeneScanRs](https://github.com/unipept/FragGeneScanRs/), and [Prodigal-gv](https://github.com/apcamargo/prodigal-gv)) as specified by user preference.
 - Scaffold annotation is not recommended due to N's providing ambiguous annotation.
-- Both Prodigal and FragGeneScanRs can be used via our --super option, and we recommend using FragGeneScanRs for samples rich in eukaryotes.
+- Both Prodigal and FragGeneScanRs can be used via our ```--super``` option, and we recommend using FragGeneScanRs for samples rich in eukaryotes.
 - FragGeneScanRs found more ORFs and KOs than Prodigal for a stimulated eukaryote rich metagenome. HMMER searches against the above databases via user specified bitscore and e-values or our minimum defaults (i.e., bitscore = 25, e-value = 1 x 10<sup>-9</sup> ).
 
-## Input formats
+### Input file formats
 
 - From any NextGen sequencing technology (from Illumina, PacBio, Oxford Nanopore)
 - type 1 raw reads (.fastq format)
 - type 2 nucleotide fasta (.fasta, .fa, .fna, .ffn format), assembled raw reads into contigs
 - type 3 protein fasta (.faa format), assembled contigs which genes are converted to amino acid sequence
 
-## Output Files
+### Output Files
 
 - If an output directory is given, that folder will be created where all files are stored.
-- If no output directory is specified, the 'results_cerberus' subfolder will be created in the current directory.
+- If no output directory is specified, the 'results_cerberus' subfolder will be created **in the current directory.**
 - Gage/Pathview R analysis provided as separate scripts within R.  
 
-## Visualization of Outputs
+### Visualization of Outputs
 
 - We use Plotly to visualize the data
-- Once the program is executed the html reports with the visuals will be saved to the last step of the pipeline.
+- Once the program is finished running, the html reports containing the visuals will be saved to the _last_ step of the pipeline.
 - The HTML files require plotly.js to be present. One has been provided in the package and is saved to the report folder.
 
 ## Annotation Rules
@@ -239,7 +246,7 @@ cerberus.py --super [input_folder]  --pacbio/--nanopore/--illumina --meta --dir_
 
 ## Prerequisites and dependencies
 
-- python >= 3.8
+- **python >= 3.8**
 
 ### Available from Bioconda - external tool list
 
@@ -257,8 +264,7 @@ cerberus.py --super [input_folder]  --pacbio/--nanopore/--illumina --meta --dir_
 
 ## Cerberus databases
 
-All pre-formatted databases are present at OSF 
-- [OSF](https://osf.io/3uz2j)
+All pre-formatted databases are present at [OSF](https://osf.io/3uz2j).
 
 ### Database sources
 
@@ -284,7 +290,8 @@ All pre-formatted databases are present at OSF
 | [FESNov](https://zenodo.org/records/10242439) | 2024 | 1 | [Rodríguez del Río et al. 2024](https://www.nature.com/articles/s41586-023-06955-z) | Coming soon |
 
 
-- NOTE: The KEGG database contains KOs related to Human disease. It is possible that these will show up in the results, even when analyzing microbes. eggNOG and FunGene database are coming soon. If you want a custom HMM build please let us know by email or leaving an issue.
+> [!NOTE] 
+> The KEGG database contains KOs related to Human disease. It is possible that these will show up in the results, even when analyzing microbes. eggNOG and FunGene database are coming soon. If you want a custom HMM build please let us know by email or leaving an issue.
 
 ### Custom Database
 
@@ -299,83 +306,99 @@ To run a custom database, you need a HMM containing the protein family of intere
 
 ## Cerberus Options
 
-- If the cerberus environment is not used, make sure the dependencies are in PATH or specified in the config file.
-- Run cerberus.py with the options required for your project.
+> [!Important] 
+> If the Cerberus environment is not used, make sure the dependencies are in PATH or specified in the config file.
 
-```bash
-usage: cerberus.py [--setup] [--update] [--list-db] [--download [DOWNLOAD ...]] [--uninstall] [-c CONFIG] [--prodigal PRODIGAL [PRODIGAL ...]]
-                       [--fraggenescan FRAGGENESCAN [FRAGGENESCAN ...]] [--super SUPER [SUPER ...]] [--prodigalgv PRODIGALGV [PRODIGALGV ...]]
-                       [--phanotate PHANOTATE [PHANOTATE ...]] [--protein PROTEIN [PROTEIN ...]] [--hmmer-tsv HMMER_TSV [HMMER_TSV ...]] [--class CLASS]
-                       [--illumina | --nanopore | --pacbio] [--dir-out DIR_OUT] [--replace] [--keep] [--tmpdir TMPDIR] [--hmm HMM [HMM ...]] [--db-path DB_PATH] [--meta]
-                       [--scaffolds] [--minscore MINSCORE] [--evalue EVALUE] [--skip-decon] [--skip-pca] [--cpus CPUS] [--chunker CHUNKER] [--grouped] [--version] [-h]
-                       [--adapters ADAPTERS] [--qc_seq QC_SEQ]
+- Run `cerberus.py` with the options required for your project.
 
-Setup arguments:
-  --setup               Setup additional dependencies [False]
-  --update              Update downloaded databases [False]
-  --list-db             List available and downloaded databases [False]
-  --download [DOWNLOAD ...]
-                        Downloads selected HMMs. Use the option --list-db for a list of available databases, default is to download all available databases
-  --uninstall           Remove downloaded databases and FragGeneScan+ [False]
+### Usage of ```cerberus.py```: 
+>[!Note]
+> The following are different options/arguments to modify the execution of Cerberus.
 
-Input files
-At least one sequence is required.
-    accepted formats: [.fastq, .fq, .fasta, .fa, .fna, .ffn, .faa]
-Example:
-> cerberus.py --prodigal file1.fasta
-> cerberus.py --config file.config
-*Note: If a sequence is given in [.fastq, .fq] format, one of --nanopore, --illumina, or --pacbio is required.:
-  -c CONFIG, --config CONFIG
-                        Path to config file, command line takes priority
-  --prodigal PRODIGAL [PRODIGAL ...]
-                        Prokaryote nucleotide sequence (includes microbes, bacteriophage)
-  --fraggenescan FRAGGENESCAN [FRAGGENESCAN ...]
-                        Eukaryote nucleotide sequence (includes other viruses, works all around for everything)
-  --super SUPER [SUPER ...]
-                        Run sequence in both --prodigal and --fraggenescan modes
-  --prodigalgv PRODIGALGV [PRODIGALGV ...]
-                        Giant virus nucleotide sequence
-  --phanotate PHANOTATE [PHANOTATE ...]
-                        Phage sequence
-  --protein PROTEIN [PROTEIN ...], --amino PROTEIN [PROTEIN ...]
-                        Protein Amino Acid sequence
-  --hmmer-tsv HMMER_TSV [HMMER_TSV ...]
-                        Annotations tsv file from HMMER (experimental)
-  --class CLASS         path to a tsv file which has class information for the samples. If this file is included scripts will be included to run Pathview in R
-  --illumina            Specifies that the given FASTQ files are from Illumina
-  --nanopore            Specifies that the given FASTQ files are from Nanopore
-  --pacbio              Specifies that the given FASTQ files are from PacBio
 
-Output options:
-  --dir-out DIR_OUT     path to output directory, defaults to "results-cerberus" in current directory. [./results-cerberus]
-  --replace             Flag to replace existing files. [False]
-  --keep                Flag to keep temporary files. [False]
-  --tmpdir TMPDIR       temp directory for RAY (experimental) [system tmp dir]
+#### &bull; **Setup arguments:**
 
-Database options:
-  --hmm HMM [HMM ...]   A list of databases for HMMER. Use the option --list-db for a list of available databases [KOFam_all]
-  --db-path DB_PATH     Path to folder of databases [Default: under the library path of Cerberus]
+|Argument/Option    | Function [Default]   | Usage Format    | Accepted format |            Example (Type as one line)                 |
+|:----------  | :--------------------- | :------------------ | :------------------------ | :----------------------------- |
+|  ```--setup``` |  Setup additional dependencies [False]  |  ```--setup``` |  N/A  | ```cerberus.py --setup```  |  
+| ```--update``` | Update downloaded databases [False] | ```--update``` | N/A | ```cerberus.py --update```|
+| ```--list-db``` | List available and downloaded databases [False] | ```--list-db``` | N/A | ```cerberus.py --list-db```  | 
+| ```--download``` | Downloads selected HMMs. Use the option ```--list-db``` for a list of available databases, default is to download all available databases | ```--download [DOWNLOAD ...]``` | ```--download [.HMM FILE]``` | ```--download path/to/example/directory.hmm```  |
+| ```--uninstall``` | Remove downloaded databases and FragGeneScan+ [False] | ```--uninstall``` | N/A | ```cerberus.py --uninstall``` |
 
-optional arguments:
-  --meta                Metagenomic nucleotide sequences (for prodigal) [False]
-  --scaffolds           Sequences are treated as scaffolds [False]
-  --minscore MINSCORE   Score cutoff for parsing HMMER results [60]
-  --evalue EVALUE       E-value cutoff for parsing HMMER results [1e-09]
-  --remove-n-repeats    Remove N repeats, splitting contigs [False]
-  --skip-decon          Skip decontamination step. [False]
-  --skip-pca            Skip PCA. [False]
-  --cpus CPUS           Number of CPUs to use per task. System will try to detect available CPUs if not specified [Auto Detect]
-  --chunker CHUNKER     Split files into smaller chunks, in Megabytes [Disabled by default]
-  --grouped             Group multiple fasta files into a single file before processing. When used with chunker can improve speed
-  --version, -v         show the version number and exit
-  -h, --help            show this help message and exit
+#### &bull; **Input File Arguments:**
 
-  --adapters ADAPTERS   FASTA File containing adapter sequences for trimming
-  --qc_seq QC_SEQ       FASTA File containing control sequences for decontamination
+>[!Important] 
+> **At least one** sequence is required.
+>
+> **Accepted formats**: [.fastq, .fq, .fasta, .fa, .fna, .ffn, .faa]
+>
+> _Example:_
+>   
+> - ```cerberus.py --prodigal file1.fasta``` 
+> - ```cerberus.py --config file.config```
+>
+> If a sequence is given in [.fastq, .fq] format, one of `--nanopore`, `--illumina`, or `--pacbio` **is required.**:
+>
+> **Option format interpretation:**
+>    
+> - ```--setup``` = accepts no additional options
+>
+> - ```--download DOWNLOAD``` = accepts one option, (represented by capitalized command 'DOWNLOAD')
+>
+> - ```--fraggenescan FRAGGENESCAN [FRAGGENESCAN...]``` = accepts one or greater options (represented by capitalized commands)
 
-Args that start with '--' can also be set in a config file (specified via -c). Config file syntax allows: key=value, flag=true, stuff=[a,b,c] (for details, see syntax at
-https://goo.gl/R74nmi). In general, command-line values override config file values which override defaults.
-```
+|Argument/Option    | Function    | Usage Format    | Accepted format | # Options Accepted | Example (Type as one line)  |
+|:----------:  | :---------------------: | :------------------: | :------------------------: | :------- | :-----------------------------: |
+| ```-c``` or ```--config``` | Path to config file, command line takes priority | ```-c CONFIG``` or ```--config CONFIG``` | Path to config file | 1 | ```-c path/to/config/file``` |
+| ```--prodigal``` | Prokaryote nucleotide sequence (includes microbes, bacteriophage) | ```--prodigal PRODIGAL [PRODIGAL ...]``` | Sequence file | =>1 | ```--prodigal FILE1 FILE2...```|
+| ```--fraggenescan``` | Eukaryote nucleotide sequence (includes other viruses, works all around for everything) | ```--fraggenescan FRAGGENESCAN [FRAGGENESCAN ...]``` | Sequence file | =>1 | ```--fraggenescan FILE1 FILE2...```
+| ```--super``` | Run sequence in **both** `--prodigal` and `--fraggenescan` modes | `--super SUPER [SUPER ...]` | Sequence file | =>1 | ```--super FILE1 FILE2...``` |
+| `--prodigalgv` | Giant virus nucleotide sequence | `--prodigalgv PRODIGALGV [PRODIGALGV ...]` | Sequence file | =>1 | `--prodigalgv FILE1 FILE2...` |
+| `--phanotate` | Phage sequence | `--phanotate PHANOTATE [PHANOTATE ...]` | Sequence file | =>1 | `--phanotate  FILE1 FILE2...` | 
+| `--protein` or `--amino` | Protein Amino Acid sequence | `--protein PROTEIN [PROTEIN ...]` or `--amino PROTEIN [PROTEIN ...]` | Sequence file | =>1 | `--protein FILE1 FILE2...` or `--amino FILE1 FILE2...` | 
+| `--hmmer-tsv` | Annotations tsv file from HMMER (experimental) | `--hmmer-tsv HMMER_TSV [HMMER_TSV ...]` | Sequence file | =>1 | `--hmmer-tsv FILE1 FILE2...` |
+| `--class` | path to a tsv file which has class information for the samples. If this file is included, scripts will be included to run Pathview in R | `--class CLASS` | Path to TSV file | 1 | `--class TSV_FILE1 |
+| `--illumina` | Specifies that the given FASTQ files are from Illumina | `--illumina` | N/A | N/A | `cerberus.py --illumina` |
+| `--nanopore` | Specifies that the given FASTQ files are from Nanopore | `--nanopore` | N/A | N/A | `cerberus.py --nanopore` |  
+| `--pacbio` | Specifies that the given FASTQ files are from PacBio | `--pacbio` | N/A | N/A | `cerberus.py --pacbio` | 
+
+#### &bull; **Output options:**
+
+|Argument/Option    | Function [DEFAULT]    | Usage Format    | Accepted format | # Options Accepted | Example (Type as one line)  |
+|:----------:  | :---------------------: | :------------------: | :------------------------: | :------- | :-----------------------------: |
+| `--dir-out` | path to output directory, defaults to "results-cerberus" in current directory. [./results-cerberus] | `--dir-out DIR_OUT` | output file path | 1 | `--dir-out path/to/output/file` |
+| `--replace` | Flag to replace existing files. [False] | `--replace` | `cerberus.py` option | N/A | `cerberus.py --replace` |
+| `--keep` | Flag to keep temporary files. [False] | `--keep` | `cerberus.py` option | N/A | `cerberus.py --keep` | 
+| `--tmpdir` | Temp directory for RAY (experimental) [system tmp dir] | `--tmpdir TMPDIR` | `cerberus.py` option | 1 | `--tmpdir TEMPFILE1` |
+
+#### &bull; **Database options:**
+  
+|Argument/Option    | Function [DEFAULT]    | Usage Format    | Accepted format | # Options Accepted | Example (Type as one line)  |
+|:----------:  | :---------------------: | :------------------: | :------------------------: | :------- | :-----------------------------: |
+| `--hmm` | A list of databases for HMMER. Use the option `--list-db` for a list of available databases [KOFam_all] | `--hmm HMM [HMM ...]` | `cerberus.py` option | =>1 | `cerberus.py --hmm DATABASE1 DATABASE2...` |
+| `--db-path` | Path to folder of databases [Default: under the library path of Cerberus] | `--db-path DB_PATH` | path to databases folder | 1 | `--db-path path/to/databases/folder` | 
+
+#### &bull; **Optional Arguments:** 
+   
+|Argument/Option    | Function [DEFAULT]    | Usage Format    | Accepted format | # Options Accepted | Example (Type as one line)  |
+|:----------:  | :---------------------: | :------------------: | :------------------------: | :------- | :-----------------------------: |
+| `--scaffolds` | Sequences are treated as scaffolds [False] | `--scaffolds` | `cerberus.py` option | N/A | `cerberus.py --scaffolds` |  
+| `--minscore` | Score cutoff for parsing HMMER results [60] | `--minscore MINSCORE` | whole integer value | 1 | `cerberus.py --minscore 50` |
+| `--evalue` | E-value cutoff for parsing HMMER results [1e-09] | `--evalue EVALUE` | E-value | 1 | `cerberus.py --evalue [E-value]` | 
+|  `--skip-decon` | Skip decontamination step. [False] | `--skip-decon` | `cerberus.py` option | N/A | `cerberus.py --skip-decon` |
+| `--skip-pca` | Skip PCA. [False] | `--skip-pca` | `cerberus.py` option | N/A | `cerberus.py --skip-pca` | 
+| `--cpus` | Number of CPUs to use per task. System will try to detect available CPUs if not specified [Auto Detect] | `--cpus CPUS` | whole integer value | 1 | `cerberus.py --cpus 16` |
+| `--chunker` | Split files into smaller chunks, in Megabytes [Disabled by default] | `--chunker CHUNKER` | whole integer value | 1 | `cerberus.py --chunker 300` |
+| `--grouped` | Group multiple fasta files into a single file before processing. When used with `--chunker` (see above) can improve speed | `--grouped` | `cerberus.py` option | N/A | `cerberus.py --grouped` | 
+| `--version` or `-v` | show the version number and exit | `--version` or `-v` | `cerberus.py` option | N/A | `cerberus.py --version` |
+| `-h` or `--help` | show this help message and exit | `-h` or `--help` | `cerberus.py` option | N/A | `cerberus.py -h` |
+| `--adapters` | FASTA File containing adapter sequences for trimming | `--adapters ADAPTERS` | FASTA file | 1 | `cerberus.py --adapters /path/to/FASTA/file` |   
+| `--qc_seq` | FASTA File containing control sequences for decontamination | `--qc_seq QC_SEQ` | FASTA file | 1 | `cerberus.py --qc_seq /path/to/FASTA/file` |
+
+>[!NOTE]
+> Arguments/options that start with `--` can also be set in a config file (specified via `-c`). Config file syntax allows: key=value, flag=true, stuff=[a,b,c] (for details, see [syntax](https://goo.gl/R74nmi). In general, **command-line values override config file values which override defaults.**
+
 
 ### OUTPUTS (/final folder)
 
@@ -394,9 +417,11 @@ https://goo.gl/R74nmi). In general, command-line values override config file val
 
 ### GAGE / PathView
 
-After processing the HMM files Cerberus calculates a KO (KEGG Orthology) counts table from KEGG/FOAM for processing through GAGE and PathView.
-GAGE is recommended for pathway enrichment followed by PathView for visualize the metabolic pathways. A "class" file is required through the --class option to run this analysis. 
-As we are unsure which comparisons you want to make thus you have to make a class.tsv so the code will know the comparisons you want to make. 
+After processing the HMM files, Cerberus calculates a KO (KEGG Orthology) counts table from KEGG/FOAM for processing through GAGE and PathView.
+GAGE is recommended for pathway enrichment followed by PathView for visualize the metabolic pathways. A "class" file is required through the ```--class``` option to run this analysis. 
+
+> [!Tip]
+> As we are unsure which comparisons you want to make thus, you have to make a class.tsv so the code will know the comparisons you want to make. 
 
 #### For example (class.tsv):
 | Sample  |   Class      |
@@ -404,16 +429,18 @@ As we are unsure which comparisons you want to make thus you have to make a clas
 | 1A      | rhizobium    |
 | 1B      | non-rhizobium|
 
-The output is saved under the step_10-visualizeData/combined/pathview folder. Also, at least 4 samples need to be used for this type of analysis.  
+The output is saved under the step_10-visualizeData/combined/pathview folder. Also, **at least 4 samples** need to be used for this type of analysis.  
   
-GAGE and PathView also require internet access to be able to download information from a database. Cerberus will save a bash script 'run_pathview.sh' in the step_10-visualizeData/combined/pathview directory along with the KO Counts tsv files and the class file for running manualy in case Cerberus was run on a cluster without access to the internet.
+- GAGE and PathView also **require internet access** to be able to download information from a database.
+- Cerberus will save a bash script ```run_pathview.sh``` in the step_10-visualizeData/combined/pathview directory along with the KO Counts tsv files and the class file for running manualy in case Cerberus was run on a cluster without access to the internet.
 
 ### Multiprocessing / Multi-Computing with RAY
 
-Cerberus uses Ray for distributed processing. This is compatible with both multiprocessing on a single node (computer) or multiple nodes in a cluster.  
-Cerberus has been tested on a cluster using Slurm <https://github.com/SchedMD/slurm>.  
+- Cerberus uses Ray for distributed processing. This is compatible with both multiprocessing on a single node (computer) or multiple nodes in a cluster.  
+- Cerberus has been tested on a cluster using [Slurm](https://github.com/SchedMD/slurm).  
   
-A script has been included to facilitate running Cerberus on Slurm. To use Cerberus on a Slurm cluster, setup your slurm script and run it using sbatch.  
+>[!Important] 
+> A script has been included to facilitate running Cerberus on Slurm. To use Cerberus on a Slurm cluster, setup your slurm script and run it using ```sbatch```.  
 
 ```bash
 sbatch example_script.sh
@@ -458,7 +485,7 @@ echo ""
 
 ## DESeq2 and Edge2 Type I errors
 
-Both edgeR and DeSeq2 R have the highest sensitivity when compared to other algorithms that control type-I error when the FDR was at or below 0.1. EdgeR and DESeq2 all perform fairly well in simulation and via data splitting (so no parametric assumptions). Typical benchmarks will show limma having stronger FDR control across all types of datasets (it’s hard to beat the moderated t-test), and edgeR and DESeq2 having higher sensitivity for low counts (makes sense as limma has to filter these out / down-weight them to use the normal model on log counts). Further information about type I errors are present from Mike Love's vignette here [vignette](https://bioconductor.org/packages/devel/bioc/vignettes/DESeq2/inst/doc/DESeq2.html#multi-factor-designs)
+Both edgeR and DeSeq2 R have the highest sensitivity when compared to other algorithms that control type-I error when the FDR was at or below 0.1. EdgeR and DESeq2 all perform fairly well in simulation and via data splitting (so no parametric assumptions). Typical benchmarks will show limma having stronger FDR control across all types of datasets (it’s hard to beat the moderated t-test), and edgeR and DESeq2 having higher sensitivity for low counts (makes sense as limma has to filter these out / down-weight them to use the normal model on log counts). Further information about type I errors are present from Mike Love's vignette [here](https://bioconductor.org/packages/devel/bioc/vignettes/DESeq2/inst/doc/DESeq2.html#multi-factor-designs).
 
 ## Contributing to Cerberus and Fungene
 
