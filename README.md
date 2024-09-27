@@ -211,41 +211,27 @@ cerberus.py --fraggenescan [input_folder] --illumina --meta --dir_out [out_folde
 
 ### Nanopore data
 
-#### Bacterial, Archaea and Bacteriophage metagenomes/metatranscriptomes
+#### Eukaryotes
 
 ```bash
 conda activate cerberus
-cerberus.py --prodigal [input_folder]  --nanopore --meta --dir_out [out_folder]
-```
-
-#### Eukaryotes and Viruses metagenomes/metatranscriptomes
-
-```bash
-conda activate cerberus
-cerberus.py --fraggenescan [input_folder] --nanopore --meta --dir_out [out_folder] 
+cerberus.py --fraggenescan [input_folder] --nanopore --dir_out [out_folder] 
 ```
 
 ### PacBio data
 
-#### Microbial, Archaea and Bacteriophage metagenomes/metatranscriptomes
+#### Eukaryotes
 
 ```bash
 conda activate cerberus
-cerberus.py --prodigal [input_folder]  --pacbio --meta --dir_out [out_folder]
-```
-
-#### Eukaryotes and Viruses metagenomes/metatranscriptomes
-
-```bash
-conda activate cerberus
-cerberus.py --fraggenescan [input_folder]  --pacbio --meta --dir_out [out_folder]
+cerberus.py --fraggenescan [input_folder] --pacbio --dir_out [out_folder]
 ```
 
 ### SUPER (both methods)
 
 ```bash
 conda activate cerberus
-cerberus.py --super [input_folder]  --pacbio/--nanopore/--illumina --meta --dir_out [out_folder]
+cerberus.py --super [input_folder] --pacbio/--nanopore/--illumina --dir_out [out_folder]
 ```
 
 - Note: Fraggenescan will work for prokaryotes and viruses/bacteriophage but prodigal will not work well for eukaryotes. 
