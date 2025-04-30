@@ -8,10 +8,11 @@ import re
 from pathlib import Path
 import pandas as pd
 import statistics as stat
+import hydraMPP
 
 
-def getStats(faa:str, hmm_tsv:dict, dfCount:dict, config:dict, dbhmms:dict, summary_out:Path, fasta_prefix:Path):
-    minscore = config["MINSCORE"]
+@hydraMPP.remote
+def getStats(faa:str, hmm_tsv:dict, dfCount:dict, minscore:int, dbhmms:dict, summary_out:Path, fasta_prefix:Path):
 
     # sum up proteins in FASTA file
     protein_index = dict()
@@ -78,7 +79,7 @@ def getStats(faa:str, hmm_tsv:dict, dfCount:dict, config:dict, dbhmms:dict, summ
     # Annotate proteins
     #TODO: use evalue as well as score for best comparison
     # Load Lookup Tables, create header
-    header = ["target", "product", "best_hit", "HMM", "evalue", "score", "EC", "gene", "ORF_start", "ORF_end", "product_start", "product_end", "product_length", "ORF_length-aa"]
+    header = ["target", "product", "best_hit", "HMM", "evalue", "score", "EC", "gene", "ORF_start", "ORF_end", "ORF_length-aa", "product_start", "product_end", "product_length"]
     empty = ["" for x in header][2:]
     dfLookup = dict()
     hmmFiles = dict()
@@ -93,7 +94,7 @@ def getStats(faa:str, hmm_tsv:dict, dfCount:dict, config:dict, dbhmms:dict, summ
         dfLookup[dbname] = pd.read_csv(dbLookup, sep='\t').fillna('')
         # open outfile for hmm matches
         hmmFiles[dbname] = open(summary_out.with_stem(f"annotation_summary_{dbname}"), 'w')
-        print("target", "product", "best_hit", "evalue", "score", "EC", "gene", "ORF_start", "ORF_end", "product_start", "product_end", "product_length", "ORF_length-aa", sep='\t', file=hmmFiles[dbname])
+        print("target", "product", "best_hit", "evalue", "score", "EC", "gene", "ORF_start", "ORF_end", "ORF_length-aa", "product_start", "product_end", "product_length", sep='\t', file=hmmFiles[dbname])
     gff = Path(faa).with_suffix(".gff")
     if gff.exists():
         gff = [x.split() for x in open(gff).readlines() if not x.startswith("#")]
@@ -106,8 +107,10 @@ def getStats(faa:str, hmm_tsv:dict, dfCount:dict, config:dict, dbhmms:dict, summ
                 orf_start, orf_end = gff[i][3:5]
             else:
                 orf_start,orf_end = ["N/A", "N/A"]
+            orf_length_aa = proteins[target]['length']
             empty[6] = orf_start
             empty[7] = orf_end
+            empty[8] = orf_length_aa
             if target in hmmHits:
                 # sort by score
                 hmmHits[target].sort(key = lambda x: x[1], reverse=False)
@@ -121,7 +124,8 @@ def getStats(faa:str, hmm_tsv:dict, dfCount:dict, config:dict, dbhmms:dict, summ
                     except: pass
                     try: gene = rows.iloc[0].Gene
                     except: pass
-                annotate = [name, query, dbname, eval, score, EC, gene, orf_start, orf_end, start, end, end-start, length]
+                orf_length_aa = proteins[target]['length']
+                annotate = [name, query, dbname, eval, score, EC, gene, orf_start, orf_end, orf_length_aa, start, end, end-start]
                 print(target, *annotate, sep='\t', file=writer)
 
                 # Write to FAA file
@@ -190,3 +194,35 @@ def getStats(faa:str, hmm_tsv:dict, dfCount:dict, config:dict, dbhmms:dict, summ
             stats[dbName+' ID Count'] = df[df['Level']=='Function']['Count'].sum()
 
     return stats
+
+
+#def get_summary(key, final_path, amino, hmm_tsv, hmmCount, config, dbHMM):
+#    prostat = None
+#    # Protein statistics & annotation summary
+#    summary_tsv = Path(final_path, key, 'final_annotation_summary.tsv')
+#    protStats[key] = getStats(amino[key], hmm_tsvs[key], hmmCounts[key], config, dbHMM, summary_tsv, Path(final_path, "fasta", f"{key}.faa"))
+#    # Create GFFs #TODO: Incorporate this into getStats (or separate all summary into new module)
+#    gff = [x for x in Path(config['DIR_OUT'], STEP[7], key).glob("*.gff")]
+#    Path(final_path, "gff").mkdir(511, True, True)
+#    if len(gff) == 1:
+#        out_gff = Path(final_path, "gff", f"{key}.gff")
+#        out_genbank = Path(final_path, f"{key}_template.gbk")
+#        cerberus_report.write_datafiles(gff[0], fasta[key], amino[key], summary_tsv, out_gff, out_genbank)
+#    else:
+#        out_gff = Path(final_path, "gff", f"{key}.gff")
+#        with out_gff.open('w') as writer:
+#            with summary_tsv.open() as read_summary:
+#                read_summary.readline()
+#                print("##gff-version  3", file=writer)
+#                for summ in read_summary:
+#                    summ = summ.split('\t')
+#                    data = [summ[0].split('_')[0], ".", ".", ".", ".", ".", ".", ".", ]
+#                    attributes = ';'.join([f"ID={summ[0]}", f"Name={summ[1]}", f"Alias={summ[2]}", f"Dbxref={summ[3]}", f"evalue={summ[4]}", f"product_start={summ[8]}", f"product_end={summ[9]}", f"product_length={summ[10]}"])
+#                    print(*data, attributes, sep='\t', file=writer)
+#            try:
+#                with open(fasta[key]) as read_fasta:
+#                    print("##FASTA", file=writer)
+#                    for line in read_fasta:
+#                        writer.write(line)
+#            except: pass
+#

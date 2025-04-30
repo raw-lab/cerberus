@@ -20,6 +20,7 @@ import pkg_resources as pkg
 import plotly.express as px
 import dominate
 from dominate.tags import *
+import hydraMPP
 
 
 # standard html header to include plotly script
@@ -36,14 +37,14 @@ htmlHeader = [
 PLOTLY_SOURCE = 'cdn'
 
 # Data resources
-STYLESHEET = pkg.resource_stream('cerberus_x', 'style.css').read().decode()
-ICON = base64.b64encode(pkg.resource_stream('cerberus_x', 'cerberus_logo.jpg').read()).decode()
-PLOTLY = pkg.resource_filename('cerberus_x', 'plotly-2.0.0.min.js')
+STYLESHEET = pkg.resource_stream('cerberus_omics', 'style.css').read().decode()
+ICON = base64.b64encode(pkg.resource_stream('cerberus_omics', 'cerberus_logo.jpg').read()).decode()
+PLOTLY = pkg.resource_filename('cerberus_omics', 'plotly-2.0.0.min.js')
 
 
 ######### Create Report ##########
-def createReport(figSunburst, figCharts, config, subdir):
-    path = f"{config['DIR_OUT']}/{subdir}"
+def createReport(figSunburst, figCharts, subdir):
+    path = Path(subdir)
     os.makedirs(path, exist_ok=True)
 
     shutil.copy(PLOTLY, path)
@@ -231,10 +232,10 @@ def write_Stats(outpath:os.PathLike, readStats:dict, protStats:dict, NStats:dict
             script(type="text/javascript", src="plotly-2.0.0.min.js")
             with style(type="text/css"):
                 raw('\n'+STYLESHEET)
-        with div(cls="document", id="metacerberus-summary"):
+        with div(cls="document", id="cerberus-summary"):
             with h1(cls="title"):
                 img(src=f"data:image/png;base64,{ICON}", height="40")
-                a("METACERBERUS", cls="reference external", href="https://github.com/raw-lab/metacerberus")
+                a("METACERBERUS", cls="reference external", href="https://github.com/raw-lab/cerberus")
                 raw(" - Statistical Summary")
             with div(cls="contents topic", id="contents"):
                 with ul(cls="simple"):
@@ -314,11 +315,11 @@ def write_HTML_files(outfile, figure, sample, name):
             script(type="text/javascript", src="plotly-2.0.0.min.js")
             with style(type="text/css"):
                 raw('\n'+STYLESHEET)
-        with div(cls="document", id="metacerberus-report"):
+        with div(cls="document", id="cerberus-report"):
             # Header
             with h1(cls="title"):
                 img(src=f"data:image/png;base64,{ICON}", height="40")
-                a("METACERBERUS", cls="reference external", href="https://github.com/raw-lab/metacerberus")
+                a("METACERBERUS", cls="reference external", href="https://github.com/raw-lab/cerberus")
                 raw(f" - {name} Bar Graphs for '{sample}'")
             # Side Panel
             with div(cls="contents topic", id="contents"):
@@ -366,6 +367,7 @@ def write_HTML_files(outfile, figure, sample, name):
 
 # Save Annotated GFF and GenBank files
 #TODO: Add embl
+@hydraMPP.remote
 def write_datafiles(gff:Path, fasta:Path, amino:Path, summary:Path, out_gff:Path, out_genbank:Path):
     # Create amino acid index
     faa_idx = dict()

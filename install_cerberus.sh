@@ -10,11 +10,9 @@ eval "$(conda shell.bash hook)"
 
 # create the Cerberus environment in conda
 mamba create -y -n $ENV_NAME -c conda-forge -c bioconda \
-	python'>=3.8' setuptools"<70.0.0" grpcio=1.43 \
-	fastqc flash2 fastp porechop bbmap trnascan-se phanotate \
-	ray-default"<=2.6.3" ray-core"<=2.6.3" ray-tune"<=2.6.3" ray-dashboard"<=2.6.3" \
-	pyrodigal pyrodigal-gv pyhmmer \
-	metaomestats plotly scikit-learn dominate python-kaleido configargparse psutil
+	python'>=3.8' setuptools"<70.0.0" hydrampp pyhmmer pyrodigal pyrodigal-gv \
+	fastqc flash2 fastp \
+	metaomestats plotly scikit-learn dominate python-kaleido configargparse psutil pandas
 
 conda activate $ENV_NAME
 

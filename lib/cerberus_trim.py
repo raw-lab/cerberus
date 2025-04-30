@@ -7,11 +7,13 @@ Uses porechop
 import os
 from pathlib import Path
 import subprocess
+import hydraMPP
 
 
 # Trim single end reads
+@hydraMPP.remote
 def trimSingleRead(key_value, config, subdir):
-    path = Path(config['DIR_OUT'], subdir)
+    path = Path(subdir)
 
     key = key_value[0]
     value = key_value[1]
@@ -43,7 +45,7 @@ def trimSingleRead(key_value, config, subdir):
 
 # Trim paired end reads
 def trimPairedRead(key_value, config, subdir):
-    path = Path(config['DIR_OUT'], subdir)
+    path = Path(subdir)
 
     key = key_value[0]
     value = key_value[1]
@@ -53,7 +55,7 @@ def trimPairedRead(key_value, config, subdir):
     trimmedReads = (Path(path, outR1), Path(path, outR2))
 
     done = path / "complete"
-    if not config['REPLACE'] and done.exists() and trimmedReads.exists():
+    if not config['REPLACE'] and done.exists() and trimmedReads[0].exists() and trimmedReads[1].exists():
         return trimmedReads
     done.unlink(missing_ok=True)
     path.mkdir(exist_ok=True, parents=True)

@@ -10,30 +10,32 @@ import subprocess
 import platform
 import urllib.request as url
 from pathlib import Path
+import hashlib
 
 
 def list_db(pathDB):
     pathDB = Path(pathDB).absolute()
     pathDB.mkdir(exist_ok=True, parents=True)
     db_tsv = Path(pathDB, "databases.tsv")
-    try:
-        url.urlretrieve("https://raw.githubusercontent.com/raw-lab/MetaCerberus/main/lib/DB/databases.tsv", db_tsv)
-    except:
-        print("WARNING: Failed to download database list")
-        if db_tsv.exists():
-            print("Using previously downloaded list")
-        else:
-            return dict(), dict(), dict(), dict()
+    #try:
+    #    url.urlretrieve("https://raw.githubusercontent.com/raw-lab/MetaCerberus/main/lib/DB/databases.tsv", db_tsv)
+    #except:
+    #    print("WARNING: Failed to download database list")
+    #    if db_tsv.exists():
+    #        print("Using previously downloaded list")
+    #    else:
+    #        return dict(), dict(), dict(), dict()
     databases = dict()
     url_paths = dict()
     hmm_version = dict()
+    hmm_md5 = dict()
     downloaded = dict()
     incomplete = dict()
     to_download = dict()
     with db_tsv.open() as reader:
         header = reader.readline().split()
         for line in reader:
-            name,filename,urlpath,date = line.split()
+            name,filename,urlpath,md5 = line.split()
             if name not in databases:
                 databases[name] = list()
             databases[name] += [filename]
@@ -42,7 +44,8 @@ def list_db(pathDB):
                 url_paths[name] = dict()
             url_paths[name][filename] = urlpath
 
-            hmm_version[name] = date
+            hmm_version[name] = md5
+            hmm_md5[filename] = md5
 
     for name,filelist in databases.items():
         down = True
@@ -50,6 +53,15 @@ def list_db(pathDB):
             filepath = Path(pathDB, filename)
             if not filepath.exists():
                 down = False
+            else:
+                with open(filepath, "rb") as reader:
+                    md5 = hashlib.md5()
+                    for chunk in iter(lambda: reader.read(4096), b""):
+                        md5.update(chunk)
+                if md5.hexdigest() != hmm_md5[filename]:
+                    print("WARNING:", filename, "md5 did not match latest version, either file is corrupt or out of date. Marking as not downloaded.")
+                    down = False
+
         if down:
             downloaded[name] = list()
             for filename in filelist:
@@ -116,7 +128,7 @@ def download(pathDB, hmms):
 
 # Update already downloaded databases
 def update(pathDB):
-    downloaded,to_download,urls,hmm_version = list_db(pathDB)
+    downloaded,to_download,urls,hmm_md5 = list_db(pathDB)
     for name,filelist in downloaded.items():
         for filepath in filelist:
             Path(filepath).unlink()
@@ -140,47 +152,4 @@ def FGS(pathFGS:os.PathLike):
 def remove(pathDB, pathFGS):
     shutil.rmtree(pathDB, ignore_errors=True)
     shutil.rmtree(os.path.join(pathFGS, "FragGeneScanRS"), ignore_errors=True)
-    return
-
-
-# Setup SLURM
-def slurm(SLURM_JOB_NODELIST):
-    """Sets up RAY on a SLURM cluster
-    Not Yet Fully Implemented"""
-
-    print("WARNING: Not yet fully implemented")
-
-    proc = subprocess.run(['scontrol', 'show', 'hostnames', SLURM_JOB_NODELIST],
-        stdout=subprocess.PIPE, text=True)
-    if proc.returncode == 0:
-        nodes = proc.stdout.split()
-    else:
-        print(f"ERROR executing 'scontrol show hostnames {SLURM_JOB_NODELIST}'")
-        return None
-    print("NODES:", nodes)
-
-    head_node = nodes[0]
-    proc = subprocess.run(['srun', '--nodes=1', '--ntasks=1', '-w', head_node, 'hostname', '--ip-address'],
-        stdout=subprocess.PIPE, text=True)
-    if proc.returncode == 0:
-        head_node_ip = proc.stdout.strip()
-    else:
-        print(f"ERROR getting head node IP")
-        return None
-
-    port = 6379
-    ip_head = f"{head_node_ip}:{port}"
-    print("IP Head:", ip_head)
-
-    print("Starting HEAD at", head_node)
-    cmd = ["srun", "--nodes=1", "--ntasks=1", "-w", head_node, "ray", "start", "--head", f"--node-ip-address={head_node_ip}", f"--port={port}", "--num-cpus", "1", "--block"]
-    subprocess.Popen(cmd)
-    time.sleep(5)
-
-    # Start Worker Nodes
-    for i in range(1, len(nodes)):
-        print(f"Starting WORKER {i} at {nodes[i]}")
-        cmd = ["srun", "--nodes=1", "--ntasks=1", "-w", nodes[i], "ray", "start", "--address", ip_head, "--num-cpus", "1", "--block"]
-        subprocess.Popen(cmd)
-        time.sleep(5)
     return

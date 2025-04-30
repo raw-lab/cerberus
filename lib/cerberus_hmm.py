@@ -7,52 +7,115 @@ Uses HMMER hmmsearch
 import os
 import re
 from pathlib import Path
+import pkg_resources as pkg
 import pyhmmer
+import hydraMPP
+
+
+PATHDB = pkg.resource_filename("cerberus_x", "DB")
+
+
+def loadHMMs(db_path, hmm_list:list):
+    db_path = Path(db_path)
+    # HMM Databases
+    DB_HMM = dict()
+
+    # Clean hmm_list
+    b_all = False
+    hmm_list = [item.strip(',') for item in hmm_list]
+    if any( item in hmm_list for item in ["ALL", "All", "all"] ):
+        b_all = True
+        hmm_list = [item for item in hmm_list if item not in ["ALL", "All", "all"]]
+
+    if Path(PATHDB, "databases.tsv").exists():
+        with Path(PATHDB, "databases.tsv").open() as reader:
+            header = reader.readline().split()
+            for line in reader:
+                name,filename,urlpath,date = line.split()[0:5]
+                if ".hmm" in Path(filename).suffixes:
+                    if name == "KOFam":
+                        name = Path(filename).with_suffix('').stem
+                        if name == "KOFam_all" and "ALL" in hmm_list:
+                            hmm_list += [name]
+                    elif b_all:
+                        hmm_list += [name]
+                    DB_HMM[name] = Path(db_path, filename)
+
+    hmm_list = set(hmm_list)
+    dbHMM = dict()
+    for hmm in hmm_list:
+        if hmm in DB_HMM:
+            if DB_HMM[hmm].exists():
+                if Path(DB_HMM[hmm]).name.startswith("KOFam"):
+                    dbHMM[f"{hmm}_KEGG"] = DB_HMM[hmm]
+                    dbHMM[f"{hmm}_FOAM"] = DB_HMM[hmm]
+                else:
+                    dbHMM[hmm] = DB_HMM[hmm]
+            else:
+                print(f"ERROR: Cannot use '{hmm}', please download it using 'cerberus.py --download {hmm}'")
+        else:
+            dbpath = Path(hmm)
+            while Path(hmm).suffixes:
+                hmm = Path(hmm).with_suffix('')
+            if dbpath.exists() and Path(hmm).with_suffix('.tsv').exists():
+                dbname = Path(dbpath).with_suffix('').stem
+                dbHMM[dbname] = dbpath
+                print("Loading custom HMM:", dbname, dbpath)
+            else:
+                print("Unable to load custom database:", hmm)
+    return dbHMM
 
 
 ## HMMER Search
-def searchHMM(aminoAcids:dict, config:dict, subdir:str, hmm:tuple, CPUs:int=4):
-    minscore = config['MINSCORE']
-    evalue = config['EVALUE']
+@hydraMPP.remote
+def searchHMM(amino:Path, evalue:float, minscore:int, hmm:Path, outfile:Path, CPUs:int=4, replace=False):
+    '''
+    amino (Path): Path to the amino acid file
+    evalue (float): the evalue cutoff for filtering
+    minscore (int): the minimum score for filtering
+    hmm (Path): Path to the hmm file for hmmsearch
+    outfile (Path): Path for the output file
+    CPUS (int)=4: optional number of CPUs
+    replace (Boolean)=False: Flag to replace files. If set to True will replace output files if they exist already
+    '''
 
-    hmmKey,hmm = hmm
+    if not replace and outfile.exists():
+        return outfile
 
-    hmmOut = dict()
-    for key,amino in aminoAcids.items():
-        path = Path(config['DIR_OUT'], subdir, key)
-        os.makedirs(path, exist_ok=True)
+    outfile.parent.mkdir(parents=True, exist_ok=True)
+    tmpfile = outfile.with_suffix('.tmp')
 
-        name_dom = f"{key}_tmp.hmm"
-        hmmOut[os.path.join(path, name_dom)] = amino
+    # HMMER
+    #errfile=outfile.with_suffix('.err').open('w')
+    alphabet = pyhmmer.easel.Alphabet.amino()
+    with open(tmpfile, 'wt') as hmm_writer, pyhmmer.plan7.HMMFile(hmm) as hmm_reader, pyhmmer.easel.SequenceFile(amino, digital=True, alphabet=alphabet) as seq_reader:
+        for hit in pyhmmer.hmmer.hmmsearch(hmm_reader, seq_reader, E=evalue, cpus=CPUs):
+            for h in hit:
+                for domain in h.domains.included:
+                    if domain.score < minscore:
+                        continue
+                    align = domain.alignment
+                    try: #TODO: This block is temporarily here during a transition of pyhmmer update, where query_name is replaced with query.name
+                        query_name = hit.query_name.decode()
+                    except:
+                        query_name = hit.query.name.decode()
+                    print(h.name.decode(), query_name, f'{h.evalue:.1E}', f"{domain.score:.1f}", h.length,
+                        align.target_from, align.target_to,
+                        sep='\t', file=hmm_writer)
+    #errfile.close
+    tmpfile.rename(outfile)
 
-    outlist = list()
-    for domtbl_out,amino in hmmOut.items():
-        pathname = os.path.dirname(domtbl_out)
-        basename = os.path.basename(domtbl_out)
-        outname = os.path.splitext(basename)[0] + ".tsv"
-        outfile = os.path.join(pathname, f"{hmmKey}-{outname}")
-
-        # HMMER
-        errfile=Path(outfile).with_suffix('.err').open('w')
-        with open(outfile, 'wt') as hmm_writer, pyhmmer.plan7.HMMFile(hmm) as hmm_reader, pyhmmer.easel.SequenceFile(amino, digital=True) as seq_reader:
-            for hit in pyhmmer.hmmer.hmmsearch(hmm_reader, seq_reader, E=evalue, cpus=CPUs):
-                for h in hit:
-                    for domain in h.domains.included:
-                        if domain.score < minscore:
-                            continue
-                        align = domain.alignment
-                        print(h.name.decode(), hit.query_name.decode(), f'{h.evalue:.1E}', f"{domain.score:.1f}", h.length,
-                            align.target_from, align.target_to,
-                            sep='\t', file=hmm_writer)
-        outlist += [outfile]
-        errfile.close
-
-    return outlist
+    return outfile
 
 
 # Filter HMM results
-def filterHMM(hmm_tsv:Path, outfile:Path, dbpath:Path):
+@hydraMPP.remote
+def filterHMM(hmm_tsv:Path, outfile:Path, dbpath:Path, replace:bool=True):
+    if not replace and outfile.exists():
+        return outfile
+
     outfile.parent.mkdir(parents=True, exist_ok=True)
+    tmpfile = outfile.with_suffix('.tmp')
 
     for i in range(1, len(dbpath.suffixes)):
         dbpath = Path(dbpath.with_suffix(''))
@@ -113,11 +176,12 @@ def filterHMM(hmm_tsv:Path, outfile:Path, dbpath:Path):
             # next line
             continue
     # Write filtered overlaps to file
-    with outfile.open('w') as writer:
+    with tmpfile.open('w') as writer:
         print("target", "query", "e-value", "score", "length", "start", "end", sep='\t', file=writer)
         for target in sorted(BH_target):
             for match in set(BH_target[target]):
                 query, e_value, score, length, start, end = match
                 print(target, query, e_value, score, length, start, end, sep='\t', file=writer)
+    tmpfile.rename(outfile)
 
     return outfile

@@ -16,8 +16,8 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="cerberus-x",
-    version="1.3.1",
+    name="CerberusOmics",
+    version="1.5.0",
     author="Jose L. Figueroa III, Richard A. White III",
     author_email="jlfiguer@charlotte.edu",
     description="Versatile Functional Ontology Assignments via Hidden Markov Model (HMM) searching with environmental focus of shotgun 'omics data",
@@ -25,11 +25,10 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/raw-lab/cerberus",
     scripts=['bin/cerberus.py',                                     # scripts to copy to 'bin' path
-             'bin/ray-slurm-cerberus.sh',
              'bin/pathview-cerberus.R'],
-    packages=['cerberus_x'],                                         # list of packages, installed to site-packages folder
-    package_dir=dict(cerberus_x='lib'),                              # dict with 'package'='relative dir'
-    package_data=dict(cerberus_x=package_files('lib/')),             # add non-python data to package, relative paths
+    packages=['cerberus_omics'],                                         # list of packages, installed to site-packages folder
+    package_dir=dict(cerberus_omics='lib'),                              # dict with 'package'='relative dir'
+    package_data=dict(cerberus_omics=package_files('lib/')),             # add non-python data to package, relative paths
     license="BSD License",  # metadata
     platforms=['Unix'],     # metadata
     classifiers=[           # This is the new updated way for metadata (PyPi??), but old way seems to still be used in some of the output
@@ -39,6 +38,8 @@ setuptools.setup(
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
         "License :: OSI Approved :: BSD License",
         "Operating System :: Unix",
     ],
@@ -46,16 +47,16 @@ setuptools.setup(
     install_requires=[
             'setuptools',
             'pandas',
-            'ray',
-            'metaomestats',
+            'pyhmmer',
+            'hydrampp',
+            'pyrodigal',
+            'pyrodigal-gv',
             'configargparse',
+            'metaomestats',
             'kaleido',
             'scikit-learn',
             'plotly',
             'psutil',
             'dominate',
-            'pyrodigal',
-            'pyrodigal-gv',
-            'pyhmmer'
             ],
 )

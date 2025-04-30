@@ -8,17 +8,19 @@ from pathlib import Path
 import re
 import subprocess
 import textwrap
+import hydraMPP
 
 
 # Remove quality from fastq
-def reformat(fastq:Path, config:dict, subdir:Path):
-    path = Path(config['DIR_OUT'], subdir)
+@hydraMPP.remote
+def reformat(fastq:Path, subdir:Path, replace=False):
+    path = Path(subdir)
     fastq = Path(fastq)
 
     fasta = Path(path, fastq.name).with_suffix(".fna")
 
     done = Path(path, 'complete')
-    if not config['REPLACE'] and done.exists() and fasta.exists():
+    if not replace and done.exists() and fasta.exists():
         return fasta
     done.unlink(missing_ok=True)
     path.mkdir(exist_ok=True, parents=True)
@@ -62,15 +64,16 @@ def split_sequenceN(name, sequence):
 
 
 # Remove N's
-def removeN(fasta:str, config:dict, subdir:os.PathLike):
-    path = Path(config['DIR_OUT'], subdir)
+@hydraMPP.remote
+def removeN(fasta:str, subdir:os.PathLike, replace=False):
+    path = Path(subdir)
 
     outFasta, ext = os.path.splitext(fasta)
     outFasta = os.path.basename(outFasta) + "_clean"+ ext
     outFasta = Path(path, outFasta)
 
     done = Path(path, 'complete')
-    if not config['REPLACE'] and done.exists() and outFasta.exists():
+    if not replace and done.exists() and outFasta.exists():
         return outFasta, None
     done.unlink(missing_ok=True)
     path.mkdir(exist_ok=True, parents=True)
