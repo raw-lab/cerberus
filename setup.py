@@ -16,7 +16,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="CerberusOmics",
+    name="Cerberus-X",
     version="1.5.0",
     author="Jose L. Figueroa III, Richard A. White III",
     author_email="jlfiguer@charlotte.edu",
@@ -26,9 +26,9 @@ setuptools.setup(
     url="https://github.com/raw-lab/cerberus",
     scripts=['bin/cerberus.py',                                     # scripts to copy to 'bin' path
              'bin/pathview-cerberus.R'],
-    packages=['cerberus_omics'],                                         # list of packages, installed to site-packages folder
-    package_dir=dict(cerberus_omics='lib'),                              # dict with 'package'='relative dir'
-    package_data=dict(cerberus_omics=package_files('lib/')),             # add non-python data to package, relative paths
+    packages=['cerberus_x'],                                         # list of packages, installed to site-packages folder
+    package_dir=dict(cerberus_x='lib'),                              # dict with 'package'='relative dir'
+    package_data=dict(cerberus_x=package_files('lib/')),             # add non-python data to package, relative paths
     license="BSD License",  # metadata
     platforms=['Unix'],     # metadata
     classifiers=[           # This is the new updated way for metadata (PyPi??), but old way seems to still be used in some of the output
