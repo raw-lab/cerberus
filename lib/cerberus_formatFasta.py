@@ -25,20 +25,17 @@ def reformat(fastq:Path, subdir:Path, replace=False):
     done.unlink(missing_ok=True)
     path.mkdir(exist_ok=True, parents=True)
 
-    command = ["sed", "-n", '1~4s/^@/>/p;2~4p', fastq.as_posix()]
-    p = subprocess.Popen(command, stdout=subprocess.PIPE, text=True)
-
-    with fasta.open('w') as writer:
+    with fastq.open('r') as reader, fasta.open('w') as writer:
         headers = set()
-        for line in p.stdout:
-            if line.startswith(">"):
-                line = line.split(maxsplit=1)
-                if line[0] in headers:
-                    line[0] += ":2"
-                headers.add(line[0])
-                writer.write(f"{line[0]} {line[1]}")
-            else:
-                writer.write(line)
+        line = reader.readline()
+        while line:
+            line = line.split(maxsplit=1)
+            if line[0] in headers:
+                line[0] += ":2"
+            headers.add(line[0])
+            writer.write(f">{line[0][1:]} {line[1]}")
+            writer.write(reader.readline())
+            line = [reader.readline() for line in range(3)][-1]
 
     done.touch()
     return fasta
