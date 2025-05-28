@@ -93,7 +93,7 @@ def getStats(faa:str, hmm_tsv:dict, dfCount:dict, minscore:int, dbhmms:dict, sum
             dbLookup = dbpath.with_name(f'{dbLookup}.tsv')
         dfLookup[dbname] = pd.read_csv(dbLookup, sep='\t').fillna('')
         # open outfile for hmm matches
-        hmmFiles[dbname] = open(summary_out.with_stem(f"annotation_summary_{dbname}"), 'w')
+        hmmFiles[dbname] = open(summary_out.with_name(f"annotation_summary_{dbname}.{summary_out.suffix}"), 'w')
         print("target", "product", "best_hit", "evalue", "score", "EC", "gene", "ORF_start", "ORF_end", "ORF_length-aa", "product_start", "product_end", "product_length", sep='\t', file=hmmFiles[dbname])
     gff = Path(faa).with_suffix(".gff")
     if gff.exists():

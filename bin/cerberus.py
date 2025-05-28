@@ -25,12 +25,11 @@ import configargparse as argparse #replace argparse with: https://pypi.org/proje
 import pkg_resources as pkg #to import package data files
 import time
 import datetime
-from urllib import request
 import socket
 import hydraMPP as hydra
 
 # our package import
-from cerberus_omics import (
+from cerberus_x import (
     cerberus_setup, cerberus_hmm, cerberus_pipeline
 )
 
@@ -45,15 +44,15 @@ FILES_FASTA = [".fasta", ".fa", ".fna", ".ffn"]
 FILES_AMINO = [".faa"]
 
 # External file paths
-PATHDB = pkg.resource_filename("cerberus_omics", "DB")
-PATHFGS = pkg.resource_filename("cerberus_omics", "FGS")
+PATHDB = pkg.resource_filename("cerberus_x", "DB")
+PATHFGS = pkg.resource_filename("cerberus_x", "FGS")
 
 # qc sequence default locations (for decontamination)
 QC_SEQ = {
-    "adapters": pkg.resource_filename("cerberus_omics", "dependency_files/adapters.fna"),
-    "illumina": pkg.resource_filename("cerberus_omics", "dependency_files/phix174_ill.ref.fna"),
-    "lambda": pkg.resource_filename("cerberus_omics", "dependency_files/lambda-phage.fna"),
-    "pacbio": pkg.resource_filename("cerberus_omics", "dependency_files/PacBio_quality-control.fna")
+    "adapters": pkg.resource_filename("cerberus_x", "dependency_files/adapters.fna"),
+    "illumina": pkg.resource_filename("cerberus_x", "dependency_files/phix174_ill.ref.fna"),
+    "lambda": pkg.resource_filename("cerberus_x", "dependency_files/lambda-phage.fna"),
+    "pacbio": pkg.resource_filename("cerberus_x", "dependency_files/PacBio_quality-control.fna")
 }
 
 # external dependencies
@@ -106,7 +105,7 @@ def main():
     setup = parser.add_argument_group('''Setup arguments''')
     setup_grp = setup.add_mutually_exclusive_group(required=False)
     setup_grp.add_argument('--setup', action="store_true", help="Setup additional dependencies [False]")
-    setup_grp.add_argument('--update', action="store_true", help="Update downloaded databases [False]")
+    setup_grp.add_argument('--update', nargs='*', default=False, help="Update downloaded databases [False]")
     setup_grp.add_argument('--list-db', action="store_true", help="List available and downloaded databases [False]")
     setup.add_argument('--download', nargs='*', default=None, help="Downloads selected HMMs. Use the option --list-db for a list of available databases, default is to download all available databases")
     setup_grp.add_argument('--uninstall', action="store_true", help="Remove downloaded databases and FragGeneScan+ [False]")
@@ -206,7 +205,7 @@ Example:
         cerberus_setup.download(args.db_path, args.download)
         return 0
     if args.update:
-        cerberus_setup.update(args.db_path)
+        cerberus_setup.update(args.db_path, args.update)
         return 0
 
     dbHMM = cerberus_hmm.loadHMMs(args.db_path, args.hmm)

@@ -16,7 +16,7 @@ import base64
 import re
 from dominate.util import raw
 import pandas as pd
-import pkg_resources as pkg
+import importlib_resources as pkg
 import plotly.express as px
 import dominate
 from dominate.tags import *
@@ -37,9 +37,11 @@ htmlHeader = [
 PLOTLY_SOURCE = 'cdn'
 
 # Data resources
-STYLESHEET = pkg.resource_stream('cerberus_omics', 'style.css').read().decode()
-ICON = base64.b64encode(pkg.resource_stream('cerberus_omics', 'cerberus_logo.jpg').read()).decode()
-PLOTLY = pkg.resource_filename('cerberus_omics', 'plotly-2.0.0.min.js')
+#STYLESHEET = pkg.resource_stream('cerberus_x', 'style.css').read().decode()
+STYLESHEET = (pkg.files("cerberus_x") / "style.css").read_text()
+#ICON = base64.b64encode(pkg.resource_stream('cerberus_x', 'cerberus_logo.jpg').read()).decode()
+ICON = base64.b64encode((pkg.files("cerberus_x") / "style.css").read_bytes()).decode()
+PLOTLY = pkg.files("cerberus_x") / 'plotly-2.0.0.min.js'
 
 
 ######### Create Report ##########

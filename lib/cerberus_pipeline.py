@@ -13,7 +13,8 @@ from pathlib import Path
 import time
 import hydraMPP as hydra
 
-from cerberus_omics import (
+from cerberus_x import (
+	cerberus_setup,
 	cerberus_qc, cerberus_merge, cerberus_trim, cerberus_decon, cerberus_formatFasta, cerberus_metastats,
 	cerberus_genecall, cerberus_hmm, cerberus_parser,
 	cerberus_prostats, cerberus_visual, cerberus_report, Chunker
@@ -63,6 +64,9 @@ def run_jobs(fastq, fasta, amino, rollup, config, outpath):
 
 	outpath = Path(outpath)
 	outpath.mkdir(parents=True, exist_ok=True)
+
+	if "EXE_FGS" not in config:
+		config["EXE_FGS"] = cerberus_setup.FGS()
 
 	# Entry Point: Fastq
 	if fastq:
@@ -298,7 +302,7 @@ def run_jobs(fastq, fasta, amino, rollup, config, outpath):
 									with tsv_out.open('a') as writer:
 										writer.write(line)
 									if re_KEGG.search(str(tsv_out)):
-										tsv_out_foam = tsv_out.with_stem(re_KEGG.sub('FOAM', tsv_out.stem))
+										tsv_out_foam = tsv_out.with_name(re_KEGG.sub('FOAM', tsv_out.name))
 										with tsv_out_foam.open('a') as writer:
 											writer.write(line)
 							dictChunks[hmm_key].remove(item)
@@ -312,8 +316,8 @@ def run_jobs(fastq, fasta, amino, rollup, config, outpath):
 							pipeline[cerberus_hmm.filterHMM.remote(tsv_out, tsv_filtered, dbHMM[hmm], config['REPLACE'])] = f"{hmm}/{k}"
 							if re_KEGG.search(str(tsv_out)):
 								hmm_foam = re_KEGG.sub('FOAM', hmm)
-								tsv_out_foam = tsv_out.with_stem(re_KEGG.sub('FOAM', tsv_out.stem))
-								tsv_filtered_foam = tsv_filtered.with_stem(re_KEGG.sub('FOAM', tsv_filtered.stem))
+								tsv_out_foam = tsv_out.with_name(re_KEGG.sub('FOAM', tsv_out.name))
+								tsv_filtered_foam = tsv_filtered.with_name(re_KEGG.sub('FOAM', tsv_filtered.name))
 								pipeline[cerberus_hmm.filterHMM.remote(tsv_out_foam, tsv_filtered_foam, dbHMM[hmm_foam], config['REPLACE'])] = f"{hmm_foam}/{k}"
 						# FINISH SPLITTING GROUP
 						continue
@@ -321,7 +325,7 @@ def run_jobs(fastq, fasta, amino, rollup, config, outpath):
 					tsv_out = Path(outpath, STEP[8], key, f"{hmm}-{key}.tsv")
 					tsv_out.parent.mkdir(parents=True, exist_ok=True)
 					if re_KEGG.search(str(tsv_out)):
-						tsv_out_foam = tsv_out.with_stem(re_KEGG.sub('FOAM', tsv_out.stem))
+						tsv_out_foam = tsv_out.with_name(re_KEGG.sub('FOAM', tsv_out.name))
 						writer_foam = tsv_out_foam.open('w')
 					with tsv_out.open('w') as writer:
 						for item in sorted(dictChunks[hmm_key]):
@@ -337,7 +341,7 @@ def run_jobs(fastq, fasta, amino, rollup, config, outpath):
 					if re_KEGG.search(str(tsv_out)):
 						writer_foam.close()
 						hmm_foam = re_KEGG.sub('FOAM', hmm)
-						tsv_filtered_foam = tsv_filtered.with_stem(re_KEGG.sub('FOAM', tsv_filtered.stem))
+						tsv_filtered_foam = tsv_filtered.with_name(re_KEGG.sub('FOAM', tsv_filtered.name))
 						pipeline[cerberus_hmm.filterHMM.remote(tsv_out_foam, tsv_filtered_foam, dbHMM[hmm_foam], config['REPLACE'])] = f"{hmm_foam}/{key}"
 			else:
 			# Not chunked file
@@ -350,7 +354,7 @@ def run_jobs(fastq, fasta, amino, rollup, config, outpath):
 					if not config['KEEP']:
 							os.remove(tsv_file)
 				if re_KEGG.search(str(tsv_out)):
-					tsv_out_foam = tsv_out.with_stem(re_KEGG.sub('FOAM', tsv_out.stem))
+					tsv_out_foam = tsv_out.with_name(re_KEGG.sub('FOAM', tsv_out.name))
 					with tsv_out_foam.open('w') as writer:
 						writer.write(open(tsv_out).read())
 				set_add(step_curr, 8.1, "STEP 8: Filtering HMMER results")
@@ -358,7 +362,7 @@ def run_jobs(fastq, fasta, amino, rollup, config, outpath):
 				pipeline[cerberus_hmm.filterHMM.remote(tsv_out, tsv_filtered, dbHMM[hmm], config['REPLACE'])] = f"{hmm}/{key}"
 				if re_KEGG.search(str(tsv_out)):
 					hmm_foam = re_KEGG.sub('FOAM', hmm)
-					tsv_filtered_foam = tsv_filtered.with_stem(re_KEGG.sub('FOAM', tsv_filtered.stem))
+					tsv_filtered_foam = tsv_filtered.with_name(re_KEGG.sub('FOAM', tsv_filtered.name))
 					pipeline[cerberus_hmm.filterHMM.remote(tsv_out_foam, tsv_filtered_foam, dbHMM[hmm_foam], config['REPLACE'])] = f"{hmm_foam}/{key}"
 		if func.startswith('filterHMM'):
 			hmm,key = key.split('/')
