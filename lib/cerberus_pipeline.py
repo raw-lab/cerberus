@@ -266,7 +266,7 @@ def run_jobs(fastq, fasta, amino, rollup, config, outpath):
 						continue
 					outfile = Path(outpath, STEP[8], key, f'{hmm[0]}-{key}.tsv')
 					if not config['REPLACE'] and outfile.exists():
-						pipeline[hydra.put("searchHMM", [str(outfile)])] = [f"{hmm[0]}/{key}"]
+						pipeline[hydra.put("searchHMM", str(outfile))] = f"{hmm[0]}/{key}"
 						continue
 					hmm_key = f"{hmm[0]}/{key}"
 					pipeline[cerberus_hmm.searchHMM.options(num_cpus=hmmer_cpus).remote(
@@ -280,7 +280,8 @@ def run_jobs(fastq, fasta, amino, rollup, config, outpath):
 			keys = key
 #			for key,tsv_file in zip(keys,value):
 			tsv_file = value
-			match = re.search(r"^chunk-([A-Za-z_]+)-(\d+)-(\d+)_(.+)", key)
+			print("FROM HMM:", key)
+			match = re.search(r"^chunk-([A-Za-z_]+)-(\d+)-(\d+)_(.+)", str(key))
 			if match: # Matches if the keys are part of chunks
 				hmm,i,l,key = match.groups()
 				hmm_key = f"{hmm}-{key}"
