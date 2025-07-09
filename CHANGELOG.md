@@ -1,5 +1,62 @@
 # Change log
 
+## Version 1.5.0
+
+Major re-write of infrastructure
+
+### New Features
+
+-Pipeline rework to make more modular
+
+### Bug Fixes
+
+-Pyhmmer update fix
+-Resume fixes
+
+## Version 1.4.1
+
+### v1.4.1 New Features
+
+- Implemented update feature to check version and corrupted downloads
+- Added resume feature to more steps
+
+### v1.4.1 Improvements
+
+- Code refactoring to be easily incorporated into other pipelines
+- Added PCA to MPP for efficiency
+- Better chunker library
+
+### v1.4.1 Bug Fixes
+
+- Fixed load HMM parsing from command line
+  - commas were causing issues
+- Fixed hmmsearch bug not always detecting fasta alphabet correctly
+  - assume amino
+- fixed bug with pyhmmer update
+
+## Version 1.4.0
+
+### v1.4.0 New Features
+
+- Replaced Ray with HydraMPP
+  - Reduced number of dependencies making install easier
+
+### v1.4.0 Improvements
+
+- Removed a redundant hmm search when using KOFam
+- Organized output files
+
+### v1.4.0 Bug Fixes
+
+- Fixed resume feature for hmm step
+- Fixed counting conflict between parser and filter steps
+
+## Version 1.3.2
+
+### v1.3.2 Bug Fixes
+
+- Fixed Ray dependency issue for MetaCerberus-lite, or when Ray is not available.
+
 ## Version 1.3.1
 
 Changing name from MetaCerberus to Cerberus to avoid confusion, Cerberus is not just for metagenomic data.
