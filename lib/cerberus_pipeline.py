@@ -280,7 +280,6 @@ def run_jobs(fastq, fasta, amino, rollup, config, outpath):
 			keys = key
 #			for key,tsv_file in zip(keys,value):
 			tsv_file = value
-			print("FROM HMM:", key)
 			match = re.search(r"^chunk-([A-Za-z_]+)-(\d+)-(\d+)_(.+)", str(key))
 			if match: # Matches if the keys are part of chunks
 				hmm,i,l,key = match.groups()
