@@ -8,7 +8,7 @@ Uses Hidden Markov Model (HMM) searching with environmental focus of shotgun met
 
 
 __version__     = "1.5.0"
-__date__        = "May 2025"
+__date__        = "July 2025"
 __author__      = "Jose L. Figueroa III, Richard A. White III"
 __copyright__   = "Copyright 2022-2025"
 
